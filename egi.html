@@ -1,0 +1,187 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GenWeb AI - Create Anything from Text</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "@google/generative-ai": "https://esm.run/@google/generative-ai",
+            "marked": "https://esm.run/marked",
+            "highlight.js": "https://esm.run/highlight.js",
+            "dompurify": "https://esm.run/dompurify"
+        }
+    }
+    </script>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" width="32" height="32">
+                    <path fill="currentColor" d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12C4,14.4 5,16.5 6.7,18C8.1,16.7 10,16 12,16C14,16 15.9,16.7 17.3,18C19,16.5 20,14.4 20,12A8,8 0 0,0 12,4M12,6A2,2 0 0,1 14,8A2,2 0 0,1 12,10A2,2 0 0,1 10,8A2,2 0 0,1 12,6M12,14C10.8,14 9.6,14.2 8.5,14.5C8.8,13.7 9.4,13 10.1,12.5C10.7,12 11.3,11.7 12,11.7C12.7,11.7 13.3,12 13.9,12.5C14.6,13 15.2,13.7 15.5,14.5C14.4,14.2 13.2,14 12,14Z"/>
+                </svg>
+                <h1>GenWeb AI</h1>
+            </div>
+            <div class="menu">
+                <button id="new-chat-button" class="menu-item special">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                    </svg>
+                    New Chat
+                </button>
+                <button class="menu-item active" data-view="chat">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M20,2H4A2,2 0 0,0 2,4V22L6,18H20A2,2 0 0,0 22,16V4A2,2 0 0,0 20,2M20,16H6L4,18V4H20V16Z"/>
+                    </svg>
+                    Chat
+                </button>
+                <button class="menu-item" data-view="preview">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/>
+                    </svg>
+                    Preview
+                </button>
+                <button class="menu-item" data-view="export">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                    </svg>
+                    Export
+                </button>
+                <button class="menu-item" data-view="projects">
+                    <svg viewBox="0 0 24 24" width="24" height="24">
+                        <path fill="currentColor" d="M3,3H9V7H3V3M15,10H21V14H15V10M15,17H21V21H15V17M13,13H7V18H13V13M3,10H9V14H3V10M13,3H21V8H13V3Z"/>
+                    </svg>
+                    Projects
+                </button>
+            </div>
+            <div class="theme-switch">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="currentColor" d="M12,18C11.11,18 10.26,17.8 9.5,17.45C11.56,16.5 13,14.42 13,12C13,9.58 11.56,7.5 9.5,6.55C10.26,6.2 11.11,6 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31L23.31,12L20,8.69Z"/>
+                </svg>
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle" checked>
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="model-selector">
+                <label for="model-select">Model:</label>
+                <select id="model-select"></select>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="view-container active" id="chat-view">
+                <div class="messages" id="messages">
+                    <div class="message system">
+                        <div class="message-content">
+                            <p>Hello! I'm GenWeb AI. I can help you create websites, web apps, games, and more just from text prompts. Try asking me to create something for you!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <div class="file-upload">
+                        <label for="image-upload" title="Upload an image">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M4,4H7L9,2H15L17,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M12,7A5,5 0 0,0 7,12A5,5 0 0,0 12,17A5,5 0 0,0 17,12A5,5 0 0,0 12,7M12,9A3,3 0 0,1 15,12A3,3 0 0,1 12,15A3,3 0 0,1 9,12A3,3 0 0,1 12,9M12,14C10.8,14 9.6,14.2 8.5,14.5C8.8,13.7 9.4,13 10.1,12.5C10.7,12 11.3,11.7 12,11.7C12.7,11.7 13.3,12 13.9,12.5C14.6,13 15.2,13.7 15.5,14.5C14.4,14.2 13.2,14 12,14Z"/>
+                            </svg>
+                        </label>
+                        <input type="file" id="image-upload" accept="image/*" style="display: none">
+                    </div>
+                    <div class="file-upload">
+                        <label for="asset-upload" title="Upload project asset">
+                            <svg viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="currentColor" d="M14,2L20,8V20A2,2 0 0,1 18,22H6A2,2 0 0,1 4,20V4A2,2 0 0,1 6,2H14M18,20V9H13V4H6V20H18M16,11H8V13H16V11M10,14H8V19H10V14M12,14V19H14V14H12Z"/>
+                            </svg>
+                        </label>
+                        <input type="file" id="asset-upload" accept=".png,.jpg,.jpeg,.gif,.svg,.mp3,.wav,.ogg,.json,.ttf,.otf" style="display: none">
+                    </div>
+                    <textarea id="user-input" placeholder="Type your message here or paste an image..." rows="1"></textarea>
+                    <button id="send-button">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor" d="M2,21L23,12L2,3V10L17,12L2,14V21Z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="view-container" id="preview-view">
+                <div class="preview-header">
+                    <h2>Live Preview</h2>
+                    <div class="preview-controls">
+                        <button id="refresh-preview">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"/>
+                            </svg>
+                            Refresh
+                        </button>
+                        <a id="open-new-tab" href="#" target="_blank" class="preview-button">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19M16,11H8V13H16V11M10,14H8V19H10V14M12,14V19H14V14H12Z"/>
+                            </svg>
+                            Open in new tab
+                        </a>
+                    </div>
+                </div>
+                <div class="preview-frame-container">
+                    <iframe id="preview-frame" sandbox="allow-scripts allow-same-origin"></iframe>
+                </div>
+            </div>
+            
+            <div class="view-container" id="export-view">
+                <div class="export-header">
+                    <h2>Export Files</h2>
+                    <div class="download-buttons">
+                        <button id="download-all">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                            </svg>
+                            Download All Files
+                        </button>
+                        <button id="download-single" class="single-file-download">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M5,5V19H19V5H5M11,7H13V13H17V15H7V13H11V7Z"/>
+                            </svg>
+                            Download as Single HTML
+                        </button>
+                    </div>
+                </div>
+                <div class="file-list" id="file-list">
+                    <!-- Files will be populated here -->
+                </div>
+            </div>
+            
+            <div class="view-container" id="projects-view">
+                <div class="projects-header">
+                    <h2>My Projects</h2>
+                    <div class="project-controls">
+                        <button id="save-project" class="project-button">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z"/>
+                            </svg>
+                            Save Current Project
+                        </button>
+                        <button id="new-project" class="project-button">
+                            <svg viewBox="0 0 24 24" width="20" height="20">
+                                <path fill="currentColor" d="M17,13H13V17H11V13H7V11H11V7H13V11H17M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+                            </svg>
+                            New Project
+                        </button>
+                    </div>
+                </div>
+                <div class="project-name-container">
+                    <input type="text" id="project-name" placeholder="Untitled Project" />
+                </div>
+                <div class="projects-list" id="projects-list">
+                    <!-- Projects will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
